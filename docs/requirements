@@ -1,0 +1,6 @@
+ipython
+ipykernel
+nbsphinx
+sphinxcontrib-bibtex
+pygments
+dunderlab-docs==0.4
