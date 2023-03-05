@@ -15,4 +15,4 @@ The app is compatible with Django 3.x and TimeScaleDB 2.x.
 For more information on TimeScaleDB, please refer to the official documentation:
 https://docs.timescale.com/latest/main/
 
-![Database model](https://github.com/dunderlab/python-django-timescaledbapp/blob/master/docs/source/notebooks/_images/myapp_models.png)
+![Database model](https://github.com/dunderlab/python-django-timescaledbapp/raw/main/docs/source/notebooks/_images/myapp_models.png)
