@@ -1,6 +1,7 @@
 from django.views.generic.base import TemplateView
-from .models import Metric, AnotherMetricFromTimeScaleModel, TemperatureReading
+# from .models import MultiChannelFloat, MultiChannelJson, SingleChannelFloat, SingleChannelJson
 from datetime import datetime
+from django.utils import timezone
 
 
 ########################################################################
@@ -11,6 +12,7 @@ class HomeView(TemplateView):
     def get_context_data(self, **kwargs):
         """"""
         context = super().get_context_data(**kwargs)
-        TemperatureReading.objects.create(temperature=72.5, location='San Francisco', time=datetime.now())
+
+        self
 
         return context

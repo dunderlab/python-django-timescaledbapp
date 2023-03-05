@@ -7,7 +7,7 @@ pre.literal-block,
 }
 
 .docutils.literal {
-    color: #092e20;
+    color: #12c5a5;
     padding: 1px 4px;
     margin: 0 -2px;
     border-radius: 2px;
@@ -18,13 +18,13 @@ div.nbinput.container div.input_area {
 }
 
 a.reference {
-    border-bottom: 1px dotted #092e20;
-    color: #092e20;
+    border-bottom: 1px dotted #12c5a5;
+    color: #12c5a5;
 }
 
 a.reference:hover {
-    border-bottom: 1px solid #062016;
-    color: #062016;
+    border-bottom: 1px solid #0c8973;
+    color: #0c8973;
 }
 
 
@@ -99,4 +99,13 @@ dl:not(.docutils) dl dt {
 
 .sphinxsidebarwrapper p.caption{
     font-size: 20px;
+}
+
+.dunderlab-footer {
+    margin-top: 80px;
+    background-color: #7878780d;
+    padding: 30px;
+    border: 1px solid #12c5a5;
+    border-width: 3px 0 0 0;
+    border-radius: 5px;
 }

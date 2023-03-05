@@ -3,6 +3,13 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath('../../dunderlab/django'))
+sys.path.insert(0, os.path.abspath('../../dunderlab/django/timescaledbapp'))
+sys.path.insert(0, os.path.abspath('../../dunderlab'))
+
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
@@ -25,9 +32,25 @@ exclude_patterns = []
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
+html_logo = '_static/logo.svg'
+html_favicon = '_static/favico.ico'
+
 html_theme = 'alabaster'
 html_static_path = ['_static']
 
+html_theme_options = {
+    'caption_font_family': 'Noto Sans',
+    'font_family': 'Noto Sans',
+    'head_font_family': 'Noto Sans',
+    'page_width': '1280px',
+    'sidebar_width': '300px',
+}
 
-dunderlab_color_links = '#092e20'
-dunderlab_code_reference = False
+autodoc_mock_imports = [
+    'timescale',
+    'django.db',
+]
+
+dunderlab_color_links = '#12c5a5'
+dunderlab_code_reference = True
+dunderlab_github_repository = 'https://github.com/dunderlab/python-django-timescaledbapp'

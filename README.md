@@ -1,17 +1,18 @@
-# TimeScaleDB
+# TimeScaleDB App
 
-## Run TimeScaleDB on Docker
+The TimeScaleDB App is a Django app designed to work with TimeScaleDB, a time-series database built on top of PostgreSQL. The app provides models for storing time-series data in the database, including information about the measuring device, its channels, and the time series data itself.
 
-### Get Docker TimeScaleDB image
+## Functionality
 
+The app includes the following models:
 
-```python
-docker pull timescale/timescaledb:latest-pg15
-```
+- Measure: stores metadata of a measuring device.
+- Channel: stores the channels of a measuring device.
+- TimeSerie: stores the time series data for a specific channel.
 
-### Run container
+The app is compatible with Django 3.x and TimeScaleDB 2.x.
 
+For more information on TimeScaleDB, please refer to the official documentation:
+https://docs.timescale.com/latest/main/
 
-```python
-docker run -d --name timescaledb -p 127.0.0.1:5432:5432 -e POSTGRES_PASSWORD=password -e POSTGRES_USER=dunderlab -e POSTGRES_DB=dunderlab_timescale_v3 timescale/timescaledb:latest-pg15
-```
+![Database model](https://github.com/dunderlab/python-django-timescaledbapp/blob/master/docs/source/notebooks/_images/myapp_models.png)

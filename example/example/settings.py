@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'dunderlab.django.timescaledbapp.apps.DunderlabTimescaledbConfig'
+    'django_extensions',
+    'dunderlab.django.timescaledbapp.apps.DunderlabTimescaledbConfig',
 ]
 
 MIDDLEWARE = [
@@ -78,20 +79,18 @@ WSGI_APPLICATION = "example.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
+        "NAME": BASE_DIR.joinpath("db.sqlite3"),
+    },
 
-DATABASES.update({
-    'dunderlab_django_timescaledbapp': {
+    'timescaledbapp': {
         'ENGINE': 'timescale.db.backends.postgresql',
-        'NAME': 'dunderlab_timescale_v3',
-        'USER': 'dunderlab',
+        'NAME': 'dunderlab_timescale_v1',
+        'USER': 'postgres',
         'PASSWORD': 'password',
         'HOST': 'localhost',
         'PORT': '5432',
-    }
-})
+    },
+}
 
 
 DATABASE_ROUTERS = [

@@ -3,8 +3,8 @@ class DunderlabTimescaleDBRouter:
     A router to control all database operations on models in the
     auth and contenttypes applications.
     """
-    route_app_labels = {'dunderlab_django_timescaledbapp'}
-    database = 'dunderlab.django.timescaledbapp'
+    route_app_labels = {'timescaledbapp'}
+    database = 'timescaledbapp'
 
     def db_for_read(self, model, **hints):
         """

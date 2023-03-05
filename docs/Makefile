@@ -1,5 +1,6 @@
 # Minimal makefile for Sphinx documentation
 #
+#export SPHINX_APIDOC_OPTIONS=members,no-undoc-members,no-show-inheritance
 
 # You can set these variables from the command line, and also
 # from the environment for the first two.
@@ -18,3 +19,7 @@ help:
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+
+buildapi:
+	rm -f source/_modules/*
+	sphinx-apidoc -fMeETl -o source/_modules ../dunderlab/django/timescaledbapp
