@@ -11,72 +11,131 @@ and the time series data itself.
 Models
 ======
 
-- Measure: stores metadata of a measuring device.
-- Channel: stores the channels of a measuring device.
-- TimeSerie: stores the time series data for a specific channel.
+- Source: A data source that provides data to the system.
+    This model represents a data source that provides data to the system. It
+    contains information about the source's ID, creation date, name, location,
+    device, protocol, and version.
+
+- Measure: A device that generates data.
+    This model represents a device that generates data. It contains information
+    about the device's name, as well as a foreign key reference to the data
+    source that it belongs to.
+
+- Channel: A specific measurement from a device.
+    This model represents a specific measurement from a device. It contains
+    information about the measurement's name, unit of measurement, and sample
+    rate, as well as a foreign key reference to the device that the measurement
+    comes from.
+
+- TimeSerie: A single data point from a specific measurement.
+    This model represents a single data point from a specific measurement. It
+    contains information about the channel that the data point comes from, as
+    well as the value of the data point.
 
 The TimeScaleDB App is compatible with Django 3.x and TimeScaleDB 2.x.
 
 For more information on TimeScaleDB, please refer to the official documentation:
 https://docs.timescale.com/latest/main/
-
 """
+
 
 from django.db import models
 from timescale.db.models.models import TimescaleModel
 
 
 ########################################################################
-class Measure(models.Model):
-    """Model for a measuring device.
+class Source(models.Model):
+    """A data source that provides data to the system.
 
-    This model stores the metadata of a measuring device such as its unique identifier,
-    name, location, unit of measurement and sampling rate.
+    This model represents a data source that provides data to the system. It
+    contains information about the source's ID,
+    creation date, name, location, device, protocol, and version.
 
-    Attributes:
-        device_id (str): Unique identifier of the device.
-        device_name (str): Name of the device.
-        location (str): Location where the device is installed.
-        unit (str): Unit of measurement.
-        sample_rate (float): Sampling rate of the device.
+    Fields:
+        source_id: The unique identifier for the data source.
+        created: The date and time when the data source was created.
+        name: The name of the data source.
+        location: The location of the data source.
+        device: The device associated with the data source.
+        protocol: The protocol used by the data source.
+        version: The version of the data source.
     """
 
-    device_id = models.CharField('Device ID', primary_key=True, max_length=2**8)
-    device_name = models.CharField('Device name', max_length=2**8)
-    location = models.CharField('Location', max_length=2**8)
-    unit = models.CharField('Unit', max_length=2**8)
-    sample_rate = models.FloatField('Sample rate')
+    source_id = models.CharField('Source ID', primary_key=True, max_length=2**8)
+    created = models.DateTimeField('Created', auto_now_add=False)
+    name = models.CharField('Name', max_length=2**8)
+    location = models.CharField('Location', max_length=2**8, null=True, blank=True)
+    device = models.CharField('Device', max_length=2**8, null=True, blank=True)
+    protocol = models.CharField('Protocol', max_length=2**8, null=True, blank=True)
+    version = models.CharField('Version', max_length=2**4, null=True, blank=True)
+
+    # ----------------------------------------------------------------------
+    def __str__(self):
+        return f'Source({source_id}): {self.source_name} {self.device} {self.version}'
+
+
+########################################################################
+class Measure(models.Model):
+    """A measure associated with a data source.
+
+    This model represents a measure associated with a data source. It contains
+    information about the measure's name and the source it is associated with.
+
+    Fields:
+        source: The data source associated with the measure.
+        name: The name of the measure.
+    """
+    source = models.ForeignKey('Source', on_delete=models.CASCADE, related_name='measures')
+    name = models.CharField('Device name', max_length=2**8)
+
+    # ----------------------------------------------------------------------
+    def __str__(self):
+        """"""
+        return f'Measure: {self.name}'
 
 
 ########################################################################
 class Channel(models.Model):
-    """Model for a channel of a measuring device.
+    """A channel that belongs to a measure and provides a unit and sample rate.
 
-    This model stores the channels of a measuring device. A channel is a physical
-    or virtual input on the device that measures a quantity. For example, a temperature
-    sensor may have a channel for the air temperature and another for the surface temperature.
+    This model represents a channel that belongs to a measure and provides information
+    about the unit of measurement and sample rate. It is associated with a single measure
+    and can be accessed through the `channels` attribute of a measure.
 
-    Attributes:
-        measure (ForeignKey): A foreign key to the Measure model.
-        name (str): Name of the channel.
+    Fields:
+        measure: The measure associated with the channel.
+        unit: The unit of measurement for the channel.
+        name: The name of the channel.
+        sample_rate: The sample rate for the channel in samples per second.
     """
 
     measure = models.ForeignKey('Measure', on_delete=models.CASCADE, related_name='channels')
+    unit = models.CharField('Unit', max_length=2**8)
     name = models.CharField('Name', max_length=2**8)
+    sample_rate = models.FloatField('Sample rate')
+
+    # ----------------------------------------------------------------------
+    def __str__(self):
+        """"""
+        return f'Channel: {self.name}'
 
 
 ########################################################################
 class TimeSerie(TimescaleModel):
-    """Model for a time series data.
+    """A timeseries data point for a channel.
 
-    This model stores the time series data for a specific channel of a measuring device.
-    Each record contains the value of the data point in the time series and a timestamp
-    indicating when the data point was measured.
+    This model represents a single data point in a timeseries for a channel. It contains
+    a reference to the channel it belongs to and the numerical value of the data point.
 
     Attributes:
-        measure (ForeignKey): A foreign key to the Channel model.
-        value (float): The value of the data point in the time series.
+        channel: A foreign key reference to the channel the timeseries belongs to.
+        value: The numerical value of the data point.
     """
 
-    measure = models.ForeignKey('Channel', on_delete=models.CASCADE, related_name='timeseries')
+    channel = models.ForeignKey('Channel', on_delete=models.CASCADE, related_name='timeseries')
     value = models.FloatField()
+
+    # ----------------------------------------------------------------------
+    def __str__(self):
+        """"""
+        return f'Time serie: {self.time}:{self.value}'
