@@ -1,0 +1,26 @@
+#!/usr/bin/env python
+
+import argparse
+import os
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--name', default='timescaledb', help='', type=str)
+parser.add_argument('--network', default='mynetwork', help='', type=str)
+parser.add_argument('--password', default='password', help='', type=str)
+parser.add_argument('--port', default=5432, help='El puerto en el que se ejecutará la aplicación', type=int)
+args = parser.parse_args()
+
+CONTAINER_NAME = args.name
+PORT = args.port
+IMAGE = 'timescale/timescaledb:latest-pg15'
+PASSWORD = 'password'
+NETWORK = args.network
+
+COMMAND = f"docker stop {CONTAINER_NAME};\
+docker rm {CONTAINER_NAME};\
+docker run -d --name {CONTAINER_NAME} --network {NETWORK} -p 127.0.0.1:5432:{args.port} -e POSTGRES_PASSWORD={PASSWORD} -e POSTGRES_DB={CONTAINER_NAME} {IMAGE} -N 500"
+
+IP = f"docker inspect -f '{{{{range .NetworkSettings.Networks}}}}{{{{.IPAddress}}}}{{{{end}}}}' {CONTAINER_NAME}"
+
+print(f'Running command: {COMMAND}')
+os.system(COMMAND)

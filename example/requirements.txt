@@ -1,0 +1,12 @@
+djangorestframework
+markdown
+django-filter
+django_extensions
+psycopg2
+numpy
+aiohttp
+requests
+psutil
+channels
+uvicorn
+whitenoise
