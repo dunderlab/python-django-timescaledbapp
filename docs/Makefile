@@ -23,3 +23,4 @@ help:
 buildapi:
 	rm -f source/_modules/*
 	sphinx-apidoc -fMeETl -o source/_modules ../dunderlab/django/timescaledbapp
+	python fix_readme.py
