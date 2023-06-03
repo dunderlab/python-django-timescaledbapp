@@ -154,17 +154,17 @@ class aioAPI:
             A dictionary containing the response data if the response status is 200 or 201, None otherwise.
         """
         timeout = aiohttp.ClientTimeout(total=5 * 60)
-        
+
         params = {}
-        
+
         if mode == 'post':
             data = json.dumps(data)
             timeout = aiohttp.ClientTimeout(total=100 * 60)
-        
+
         if mode == 'get' and data:
             timeout = aiohttp.ClientTimeout(total=5 * 60)
-            params, data  = data, params
-            
+            params, data = data, params
+
         if not url:
             url = self.HTTP_SERVICE + call + "/"
 
@@ -172,12 +172,6 @@ class aioAPI:
             url = f'{url}{data["id"]}/'
             data = json.dumps(data)
 
-            # print(url)
-            # print(data)            
-            
-            # params = data
-            # data = None
-            
         async with aiohttp.ClientSession(headers=self.headers, timeout=timeout) as session:
             async with getattr(session, mode)(url, params=params, data=data, auth=self.AUTH) as response:
                 if response.status in [200, 201]:
