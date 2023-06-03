@@ -104,4 +104,4 @@ TimeScaleDB App is released under the [MIT License](https://opensource.org/licen
 
 
 
-![Database model](https://github.com/dunderlab/python-django-realtimedbapp/raw/main/docs/source/notebooks/_images/myapp_models.png)
+![Database model](https://github.com/dunderlab/python-django-timescaledbapp/raw/main/docs/source/notebooks/_images/myapp_models.png)

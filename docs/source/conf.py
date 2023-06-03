@@ -58,5 +58,5 @@ autodoc_mock_imports = [
 dunderlab_maxdepth = 3
 dunderlab_color_links = '#12c5a5'
 dunderlab_code_reference = True
-dunderlab_github_repository = 'https://github.com/dunderlab/python-django-realtimedbapp'
+dunderlab_github_repository = 'https://github.com/dunderlab/python-django-timescaledbapp'
 
