@@ -70,9 +70,11 @@ from datetime import datetime
 from django.utils.timezone import make_aware
 from .models import Measure, TimeSerie, Channel, Chunk
 from typing import Type, Any, Union
-from rest_framework import serializers
+from rest_framework import serializers, status
 from .models import Source, Measure, Channel
 from django.db.models import Model
+from rest_framework.response import Response
+from django.db.utils import IntegrityError
 
 
 # ----------------------------------------------------------------------
@@ -89,7 +91,7 @@ def insert_batch(model: Type[Model], objects: list[Model], batch_size: int = 100
     batch_size : int, optional
         The size of the batch to be inserted, by default 1000
     """
-    model.objects.bulk_create(objects, batch_size=batch_size)
+    return model.objects.bulk_create(objects, batch_size=batch_size)
 
 
 ########################################################################
@@ -393,16 +395,24 @@ class TimeserieSerializer(serializers.Serializer):
                 }
                 timeseries.append(TimeSerie(**timeserie_params))
 
+        try:
+
+            insert_batch(TimeSerie, timeseries, batch_size=1000)
+        except IntegrityError:
+            return Response({
+                "status": "fail",
+                "message": "Objects can not be created.",
+            },
+                status=status.HTTP_403_FORBIDDEN, content_type='application/json')
+
         for channel_label in channel_dict:
             channel = channel_dict[channel_label]
             channel.count = channel.count + len(timestamps)
             channel.save()
 
-        insert_batch(TimeSerie, timeseries, batch_size=1000)
-
-        return {
+        return Response({
             "status": "success",
             "message": "Your data has been successfully saved.",
             "objects_created": len(timeseries),
-        }
-
+        },
+            status=status.HTTP_201_CREATED, content_type='application/json')

@@ -36,6 +36,7 @@ retrieve the data in batches, an additional 'batch_size' argument can be
 supplied to the 'get' method.
 """
 
+import inspect
 import logging
 import math
 import json
@@ -182,6 +183,7 @@ class aioAPI:
                 elif response.status == 204 and mode == 'delete':
                     return True
         logging.warning(f"Error {response.status}: {response.reason}")
+        logging.warning(f"{response.json()}")
         return None
 
     # ----------------------------------------------------------------------
@@ -231,6 +233,14 @@ class aioAPI:
             async with getattr(session, mode)(url, auth=self.AUTH) as response:
                 if response.status in [200, 201]:
                     return await response.json()
+
+    # ----------------------------------------------------------------------
+    async def next(self, data):
+        """"""
+        if inspect.isasyncgen(data) or (isinstance(data, dict) and data.get('next', False)):
+            return await anext(data)
+        else:
+            return data
 
     # ----------------------------------------------------------------------
     async def fetch_page(self, session: aiohttp.ClientSession, url: str) -> dict[str, Any]:

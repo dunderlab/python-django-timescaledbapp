@@ -14,6 +14,8 @@ from typing import Any, Optional
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import ChannelFilter, MeasureFilter, SourceFilter
 
+from django.db.utils import IntegrityError
+
 
 ########################################################################
 class CustomCreateViewSet:
@@ -380,3 +382,14 @@ class TimeserieViewSet(CustomCreateViewSet, viewsets.ModelViewSet):
             serializer = self.get_serializer(results_list[0])
 
         return self.get_paginated_response(serializer.data)
+
+    # ----------------------------------------------------------------------
+    def create(self, request, format=None):
+
+        serializer = TimeserieSerializer(data=request.data, many=isinstance(request.data, list))
+        if serializer.is_valid():
+            response = serializer.save()
+            if isinstance(response, list):
+                return Response([r.data for r in response], status=status.HTTP_200_OK)
+            return response
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

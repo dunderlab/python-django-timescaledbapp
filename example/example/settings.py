@@ -93,7 +93,7 @@ DATABASES = {
         'NAME': 'timescaledbapp_v2',
         'USER': 'postgres',
         'PASSWORD': 'password',
-        'HOST': '172.18.0.3',
+        'HOST': '172.18.0.2',
         'PORT': '5432',
     },
 }
