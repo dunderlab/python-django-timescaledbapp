@@ -9,6 +9,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+
         migrations.RunSQL(
             sql=[(
                 "CREATE TABLE public.timescaledbapp_timeserie ( \
@@ -25,5 +26,7 @@ class Migration(migrations.Migration):
             reverse_sql=[(
                 "DROP TABLE public.timescaledbapp_timeserie;"
             )]
-        )
+        ),
+
+
     ]

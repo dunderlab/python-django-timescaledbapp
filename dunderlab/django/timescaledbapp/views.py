@@ -1,3 +1,6 @@
+from rest_framework.views import APIView
+from rest_framework import status, permissions
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 import numpy as np
 from rest_framework import viewsets
 from django.utils.safestring import mark_safe
@@ -13,11 +16,14 @@ from typing import Any, Optional
 
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import ChannelFilter, MeasureFilter, SourceFilter
+from django.contrib.auth.mixins import PermissionRequiredMixin
 
-from django.db.utils import IntegrityError
-
+from rest_framework.permissions import DjangoModelPermissions
+from .permissions import AdminPermission, ConsumerPermission, ProduserPermission
 
 ########################################################################
+
+
 class CustomCreateViewSet:
     """
     Base ViewSet to support custom create actions for models. Inherits from `viewsets.ModelViewSet`.
@@ -78,6 +84,7 @@ class SourceViewSet(CustomCreateViewSet, viewsets.ModelViewSet):
     serializer_class = SourceSerializer
     pagination_class = Paginationx64
     filter_backends = [DjangoFilterBackend]
+    permission_classes = [AdminPermission | ConsumerPermission | ProduserPermission]
     filterset_class = SourceFilter
 
     # ----------------------------------------------------------------------
@@ -116,6 +123,7 @@ class MeasureViewSet(CustomCreateViewSet, viewsets.ModelViewSet):
     serializer_class = MeasureSerializer
     pagination_class = Paginationx64
     filter_backends = [DjangoFilterBackend]
+    permission_classes = [AdminPermission | ConsumerPermission | ProduserPermission]
     filterset_class = MeasureFilter
 
     # ----------------------------------------------------------------------
@@ -149,6 +157,7 @@ class ChannelViewSet(CustomCreateViewSet, viewsets.ModelViewSet):
     serializer_class = ChannelSerializer
     pagination_class = Paginationx64
     filter_backends = [DjangoFilterBackend]
+    permission_classes = [AdminPermission | ConsumerPermission | ProduserPermission]
     filterset_class = ChannelFilter
 
     # ----------------------------------------------------------------------
@@ -181,6 +190,7 @@ class ChunkViewSet(CustomCreateViewSet, viewsets.ModelViewSet):
     queryset = Chunk.objects.all()
     serializer_class = ChunkSerializer
     pagination_class = Paginationx64
+    permission_classes = [AdminPermission | ConsumerPermission | ProduserPermission]
 
     # ----------------------------------------------------------------------
     def get_view_name(self) -> str:
@@ -216,6 +226,7 @@ class TimeserieViewSet(CustomCreateViewSet, viewsets.ModelViewSet):
     """
     serializer_class = TimeserieSerializer
     queryset = TimeSerie.objects.all()
+    permission_classes = [AdminPermission | ConsumerPermission | ProduserPermission]
     pagination_class = TimeseriePagination
 
     # ----------------------------------------------------------------------
@@ -385,7 +396,7 @@ class TimeserieViewSet(CustomCreateViewSet, viewsets.ModelViewSet):
 
     # ----------------------------------------------------------------------
     def create(self, request, format=None):
-
+        """"""
         serializer = TimeserieSerializer(data=request.data, many=isinstance(request.data, list))
         if serializer.is_valid():
             response = serializer.save()
@@ -393,3 +404,4 @@ class TimeserieViewSet(CustomCreateViewSet, viewsets.ModelViewSet):
                 return Response([r.data for r in response], status=status.HTTP_200_OK)
             return response
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
