@@ -12,6 +12,7 @@ Documentation Overview
 
    notebooks/01-timescaledb_from_docker
    notebooks/02-backend
+   notebooks/03-permissions
    notebooks/03-restful_api
    notebooks/04-trial_based_database
    notebooks/05-performance
