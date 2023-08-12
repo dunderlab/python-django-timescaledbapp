@@ -1,4 +1,4 @@
-recursive-include radiant/ *
+recursive-include dunderlab/ *
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
 

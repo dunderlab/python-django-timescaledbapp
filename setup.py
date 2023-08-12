@@ -6,7 +6,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md')) as readme:
 
 setup(
     name='dunderlab-timescaledbapp',
-    version='0.1',
+    version='0.1.3',
     packages=['dunderlab.django.timescaledbapp', 'dunderlab.api'],
     author='Yeison Cardona',
     author_email='yencardonaal@unal.edu.co',
@@ -15,7 +15,7 @@ setup(
     download_url='https://github.com/dunderlab/python-django.timescaledbapp',
     install_requires=[
         'django-timescaledb',
-        'psycopg2',
+        'psycopg2-binary',
         'aiohttp',
         'numpy',
     ],

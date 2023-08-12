@@ -1,11 +1,9 @@
 from django.urls import path, include
-from rest_framework import routers
 from django.utils.safestring import mark_safe
-
-from django.urls import path
-from .views import SourceViewSet, MeasureViewSet, ChannelViewSet, TimeserieViewSet, ChunkViewSet
-
+from rest_framework import routers
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
+
+from .views import SourceViewSet, MeasureViewSet, ChannelViewSet, TimeserieViewSet, ChunkViewSet, ping_view
 
 
 ########################################################################
@@ -35,15 +33,13 @@ router.register(r'measure', MeasureViewSet, basename='measure')
 router.register(r'channel', ChannelViewSet, basename='channel')
 router.register(r'chunk', ChunkViewSet, basename='chunk')
 router.register(r'timeserie', TimeserieViewSet, basename='timeserie')
-# router.register(r'token', CreateTokenView, basename='token')
 
 
 app_name = 'timescaledbapp'
 urlpatterns = [
 
     path('', include(router.urls)),
-
-
+    path('ping/', ping_view, name='ping'),
 
     path('api-auth/', include('rest_framework.urls')),
 

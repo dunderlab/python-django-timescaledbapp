@@ -1,29 +1,31 @@
-from rest_framework.views import APIView
-from rest_framework import status, permissions
-from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
+from typing import Any, Optional
+
 import numpy as np
-from rest_framework import viewsets
+from django.utils import timezone
+from django.http import JsonResponse
 from django.utils.safestring import mark_safe
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import status
+from rest_framework import viewsets
 from rest_framework.request import Request
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.mixins import DestroyModelMixin
 
+from .paginators import Paginationx64, TimeseriePagination
+from .filters import ChannelFilter, MeasureFilter, SourceFilter
+from .permissions import AdminPermission, ConsumerPermission, ProduserPermission
 from .models import TimeSerie, Channel, Measure, Chunk, Source, Measure, Channel
 from .serializers import SourceSerializer, MeasureSerializer, ChannelSerializer, ChunkSerializer, TimeserieSerializer
-from .paginators import Paginationx64, TimeseriePagination
-from typing import Any, Optional
 
-from django_filters.rest_framework import DjangoFilterBackend
-from .filters import ChannelFilter, MeasureFilter, SourceFilter
-from django.contrib.auth.mixins import PermissionRequiredMixin
 
-from rest_framework.permissions import DjangoModelPermissions
-from .permissions import AdminPermission, ConsumerPermission, ProduserPermission
+# ----------------------------------------------------------------------
+def ping_view(request):
+    client_timestamp = request.GET.get('timestamp')
+    server_timestamp = timezone.now()
+    return JsonResponse({'client_timestamp': client_timestamp, 'server_timestamp': server_timestamp})
+
 
 ########################################################################
-
-
 class CustomCreateViewSet:
     """
     Base ViewSet to support custom create actions for models. Inherits from `viewsets.ModelViewSet`.
@@ -404,4 +406,8 @@ class TimeserieViewSet(CustomCreateViewSet, viewsets.ModelViewSet):
                 return Response([r.data for r in response], status=status.HTTP_200_OK)
             return response
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
 
