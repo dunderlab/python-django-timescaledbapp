@@ -20,9 +20,10 @@ from .serializers import SourceSerializer, MeasureSerializer, ChannelSerializer,
 
 # ----------------------------------------------------------------------
 def ping_view(request):
-    client_timestamp = request.GET.get('timestamp')
-    server_timestamp = timezone.now()
-    return JsonResponse({'client_timestamp': client_timestamp, 'server_timestamp': server_timestamp})
+    client_timestamp = float(request.GET.get('timestamp', 0))
+    server_timestamp = timezone.now().timestamp()
+    print(client_timestamp, server_timestamp)
+    return JsonResponse({'client_timestamp': str(client_timestamp), 'server_timestamp': str(server_timestamp)})
 
 
 ########################################################################

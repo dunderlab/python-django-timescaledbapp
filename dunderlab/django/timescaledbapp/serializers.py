@@ -371,7 +371,7 @@ class TimeserieSerializer(serializers.Serializer):
         else:
             chunk, _ = Chunk.objects.get_or_create(measure=measure, label=validated_data.pop('chunk', 'default'))
 
-        if isinstance(timestamps[0], float):
+        if isinstance(timestamps[0], (float, int, np.integer, np.floating)):
             timestamps = np.array(list(map(lambda t:
                                            make_aware(datetime.fromtimestamp(t)), timestamps)))
 
