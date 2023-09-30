@@ -1,9 +1,11 @@
+import json
 from typing import Any, Optional
 
 import numpy as np
 from django.utils import timezone
 from django.http import JsonResponse
 from django.utils.safestring import mark_safe
+from django.views.decorators.csrf import csrf_exempt
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework import viewsets
@@ -19,14 +21,28 @@ from .serializers import SourceSerializer, MeasureSerializer, ChannelSerializer,
 
 
 # ----------------------------------------------------------------------
+@csrf_exempt
 def ping_view(request):
-    client_timestamp = float(request.GET.get('timestamp', 0))
-    server_timestamp = timezone.now().timestamp()
-    print(client_timestamp, server_timestamp)
-    return JsonResponse({'client_timestamp': str(client_timestamp), 'server_timestamp': str(server_timestamp)})
+    if request.method == 'GET':
+        data = request.GET.get('data', '')
+        client_timestamp = float(request.GET.get('timestamp', 0))
+        server_timestamp = float(timezone.now().timestamp())
 
+    elif request.method == 'POST':
+        params = json.loads(request.body.decode('utf8'))
+        data = str(params.get('data', ''))
+        client_timestamp = float(params.get('timestamp', 0))
+        server_timestamp = float(timezone.now().timestamp())
+
+    return JsonResponse({
+        'client_timestamp': str(client_timestamp),
+        'server_timestamp': str(server_timestamp),
+        'bytes': len(data),
+    })
 
 ########################################################################
+
+
 class CustomCreateViewSet:
     """
     Base ViewSet to support custom create actions for models. Inherits from `viewsets.ModelViewSet`.

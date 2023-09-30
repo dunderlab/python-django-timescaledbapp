@@ -386,6 +386,7 @@ class TimeserieSerializer(serializers.Serializer):
         timeseries = []
         for channel_label in values:
             channel = channel_dict[channel_label]
+            values[channel_label] = values[channel_label] * channel.scale_factor
             for i, value in enumerate(values[channel_label]):
                 timeserie_params = {
                     'timestamp': timestamps[i],

@@ -90,6 +90,7 @@ class Channel(models.Model):
     description = models.TextField('Description', max_length=2**15, null=True, blank=True)
     measure = models.ForeignKey('Measure', on_delete=models.CASCADE, related_name='channels')
     count = models.IntegerField('Count', default=0)
+    scale_factor = models.FloatField('Scale factor', default=1)
 
     class Meta:
         unique_together = ('measure', 'label')
