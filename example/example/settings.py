@@ -48,7 +48,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",  # Agrega esta línea
+    "whitenoise.middleware.WhiteNoiseMiddleware",
 
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -191,8 +191,8 @@ REST_FRAMEWORK = {
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=365),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=365 * 10),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=365 * 10),
     # 'ROTATE_REFRESH_TOKENS': False,
     # 'BLACKLIST_AFTER_ROTATION': True,
     # 'UPDATE_LAST_LOGIN': False,

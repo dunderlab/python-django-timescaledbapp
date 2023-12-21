@@ -31,13 +31,14 @@ class MeasureFilter(django_filters.FilterSet):
 
 class ChannelFilter(django_filters.FilterSet):
     label = django_filters.CharFilter(field_name='label')
+    label__in = django_filters.BaseInFilter(field_name='label')
     name = django_filters.CharFilter(field_name='name')
     measure = django_filters.CharFilter(field_name='measure__label')
     source = django_filters.CharFilter(field_name='measure__source__label')
 
     class Meta:
         model = Channel
-        fields = ['label', 'name', 'measure', 'source']
+        fields = ['label', 'name', 'measure', 'source', 'label__in']
 
 
 # class TrialFilter(django_filters.FilterSet):

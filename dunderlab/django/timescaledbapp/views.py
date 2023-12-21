@@ -40,9 +40,8 @@ def ping_view(request):
         'bytes': len(data),
     })
 
+
 ########################################################################
-
-
 class CustomCreateViewSet:
     """
     Base ViewSet to support custom create actions for models. Inherits from `viewsets.ModelViewSet`.
@@ -99,6 +98,7 @@ class SourceViewSet(CustomCreateViewSet, viewsets.ModelViewSet):
     pagination_class : Type[Paginationx64]
         The pagination class used to paginate the QuerySet.
     """
+    lookup_value_regex = "[^/]+"
     queryset = Source.objects.all()
     serializer_class = SourceSerializer
     pagination_class = Paginationx64
@@ -118,11 +118,6 @@ class SourceViewSet(CustomCreateViewSet, viewsets.ModelViewSet):
         else:
             return text
 
-    # def delete(self, request, *args, **kwargs):
-        # instance = self.get_object()
-        # self.perform_destroy(instance)
-        # return Response(status=204)
-
 
 ########################################################################
 class MeasureViewSet(CustomCreateViewSet, viewsets.ModelViewSet):
@@ -138,6 +133,7 @@ class MeasureViewSet(CustomCreateViewSet, viewsets.ModelViewSet):
     pagination_class : Type[Paginationx64]
         The pagination class used to paginate the QuerySet.
     """
+    lookup_value_regex = "[^/]+"
     queryset = Measure.objects.all()
     serializer_class = MeasureSerializer
     pagination_class = Paginationx64
@@ -172,6 +168,7 @@ class ChannelViewSet(CustomCreateViewSet, viewsets.ModelViewSet):
     pagination_class : Type[Paginationx64]
         The pagination class used to paginate the QuerySet.
     """
+    lookup_value_regex = "[^/]+"
     queryset = Channel.objects.all()
     serializer_class = ChannelSerializer
     pagination_class = Paginationx64
@@ -190,6 +187,26 @@ class ChannelViewSet(CustomCreateViewSet, viewsets.ModelViewSet):
             return mark_safe(f"<p>{text}</p>")
         else:
             return text
+
+    # ----------------------------------------------------------------------
+    def delete(self, request, *args, **kwargs):
+        filter_kwargs = request.data.copy()
+
+        if not filter_kwargs:
+            return Response({'status': 'Bad Request: No filters provided'}, status=status.HTTP_400_BAD_REQUEST)
+
+        filtered_queryset = self.filterset_class(data=filter_kwargs, queryset=self.queryset)
+
+        if not filtered_queryset.is_valid():
+            return Response({'status': 'Bad Request: Invalid filters'}, status=status.HTTP_400_BAD_REQUEST)
+
+        queryset_to_delete = filtered_queryset.qs
+
+        if queryset_to_delete.exists():
+            queryset_to_delete.delete()
+            return Response({'status': 'deleted'}, status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response({'status': 'Not Found'}, status=status.HTTP_404_NOT_FOUND)
 
 
 ########################################################################

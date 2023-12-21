@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Group, Permission
-from django.contrib.contenttypes.models import ContentType
-from dunderlab.django.timescaledbapp.models import Source, Measure, Channel, Chunk, TimeSerie
+# from django.contrib.contenttypes.models import ContentType
+# from dunderlab.django.timescaledbapp.models import Source, Measure, Channel, Chunk, TimeSerie
 
 
 # ----------------------------------------------------------------------
@@ -46,13 +46,13 @@ class Command(BaseCommand):
              permissions(['view_timeserie', 'add_timeserie']),
 
          ),
-         'api_transformer': (
-             # create_permission(Source, 'source', 'all'),
-             # create_permission(Measure, 'measure', 'all'),
-             # create_permission(Channel, 'channel', 'all'),
-             # create_permission(Chunk, 'chunk', 'all'),
-             # create_permission(TimeSerie, 'timeserie', 'all'),
-         ),
+         # 'api_transformer': (
+            # create_permission(Source, 'source', 'all'),
+            # create_permission(Measure, 'measure', 'all'),
+            # create_permission(Channel, 'channel', 'all'),
+            # create_permission(Chunk, 'chunk', 'all'),
+            # create_permission(TimeSerie, 'timeserie', 'all'),
+         # ),
             }
 
         for group_name in api_groups:

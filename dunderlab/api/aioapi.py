@@ -110,6 +110,10 @@ class aioAPI:
         if url:
             self.HTTP_SERVICE: str = url
         self.AUTH = auth
+
+        self.API_TOKEN = self.HTTP_SERVICE + 'api/token/'
+        self.API_TOKEN_VERIFY = self.API_TOKEN + 'verify/'
+
         if token:
             self.headers: dict[str, str] = {'Authorization': "Bearer {}".format(token)}
         else:
@@ -117,6 +121,20 @@ class aioAPI:
         self.headers['Content-Type'] = 'application/json'
         self.__endpoints__ = self.endpoints()
         assert self.__endpoints__, "No endpoints detected. Please ensure the API is operational."
+
+    # ----------------------------------------------------------------------
+    async def token(self, username, password):
+        """"""
+        response = await self.token_.post({'username': username, 'password': password}, url=self.API_TOKEN)
+        return response['access']
+
+    # ----------------------------------------------------------------------
+    async def token_verify(self, token):
+        """"""
+        response = await self.token_.post({'token': token}, url=self.API_TOKEN_VERIFY)
+        if not response:
+            return {'detail': 'Token is valid'}
+        return response
 
     # ----------------------------------------------------------------------
     async def endpoints(self) -> Optional[dict[str, Any]]:
@@ -166,13 +184,26 @@ class aioAPI:
             timeout = aiohttp.ClientTimeout(total=5 * 60)
             params, data = data, params
 
+            for k in params:
+                if k.endswith('__in') and isinstance(params[k], (list, tuple)):
+                    params[k] = ','.join(params[k])
+
+            # print(params)
+
         if not url:
             url = self.HTTP_SERVICE + call + "/"
 
         if mode in ['delete', 'patch', 'put']:
-            url = f'{url}{data["id"]}/'
+            if 'id' in data:
+                url = f'{url}{data["id"]}/'
+
+            for k in data:
+                if k.endswith('__in') and isinstance(data[k], (list, tuple)):
+                    data[k] = ','.join(data[k])
+
             data = json.dumps(data)
 
+        resp = None
         async with aiohttp.ClientSession(headers=self.headers, timeout=timeout) as session:
             async with getattr(session, mode)(url, params=params, data=data, auth=self.AUTH) as response:
                 if response.status in [200, 201]:
@@ -182,9 +213,14 @@ class aioAPI:
                     return resp
                 elif response.status == 204 and mode == 'delete':
                     return True
+                else:
+                    try:
+                        resp = await response.json()
+                    except:
+                        resp = {}
+
         logging.warning(f"Error {response.status}: {response.reason}")
-        logging.warning(f"{response.json()}")
-        return None
+        return resp
 
     # ----------------------------------------------------------------------
     async def request_generator(self, resp: dict[str, Any], mode: str) -> AsyncGenerator[dict[str, Any], None]:
@@ -324,7 +360,7 @@ class aioAPI:
                 """
                 Initialize the inset instance with a specific endpoint.
                 """
-                self.endpoint = endpoint
+                self.endpoint = endpoint.strip('_')
 
             # ----------------------------------------------------------------------
             def adjust_page_size(self, data: dict[str, Any], batch_size: Optional[int] = None) -> list[dict[str, Any]]:

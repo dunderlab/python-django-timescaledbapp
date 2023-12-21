@@ -201,7 +201,7 @@ profile = Profile()
 
 
 # ----------------------------------------------------------------------
-def get_data(data_trials_response: Union[dict, list]) -> Union[Tuple[np.ndarray, np.ndarray], np.ndarray]:
+def get_data(data_trials_response: Union[dict, list], timestamps: bool = False) -> Union[Tuple[np.ndarray, np.ndarray], np.ndarray]:
     """
     This function processes the input data trials response which could be a dictionary or a list of dictionaries.
     The goal is to convert the input into structured numpy arrays containing data and classes (when available).
@@ -229,6 +229,7 @@ def get_data(data_trials_response: Union[dict, list]) -> Union[Tuple[np.ndarray,
         data_trials_response = [data_trials_response]
 
     data = []
+    timestamps_ = []
     classes = []
 
     # Iterate over the data trials response
@@ -259,15 +260,38 @@ def get_data(data_trials_response: Union[dict, list]) -> Union[Tuple[np.ndarray,
                 # Append class label
                 classes.append(trial['chunk'])
 
+        if isinstance(data_trials['results']['timestamps'], dict):
+            tt = []
+            for channel in data_trials['results']['timestamps']:
+                tt.append(data_trials['results']['timestamps'][channel])
+            timestamps_.append(tt)
+        else:
+            timestamps_.append(data_trials['results']['timestamps'])
+
     # Convert data and classes to numpy arrays
     data = np.array(data)
     classes = np.array(classes)
+    timestamps_ = np.array(timestamps_)
+    try:
+        timestamps_ = np.concatenate(timestamps_, axis=1)
+    except:
+        timestamps_ = np.concatenate(timestamps_, axis=0)
 
     # Clean up by deleting the original data_trials_response
     del data_trials_response
 
     # Return data and classes as a tuple if classes are available, otherwise return concatenated data array
-    if classes.size:
-        return data, classes
+
+    if timestamps:
+        if classes.size:
+            return data, classes, timestamps_
+        else:
+            return np.concatenate(data, axis=1), timestamps_
     else:
-        return np.concatenate(data, axis=0)
+        if classes.size:
+            return data, classes
+        else:
+            return np.concatenate(data, axis=1)
+
+
+
