@@ -21,7 +21,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-^71a8ao^v*d&l*s^1ak%a9*5#!)rp1_&g)ny)dpf9u$$@8r8nb"
+SECRET_KEY = (
+    "django-insecure-^71a8ao^v*d&l*s^1ak%a9*5#!)rp1_&g)ny)dpf9u$$@8r8nb"
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -49,7 +51,6 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
-
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -89,7 +90,6 @@ DATABASES = {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR.joinpath("db.sqlite3"),
     },
-
     'timescaledb': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'timescaledb',
@@ -164,16 +164,13 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # AUTH_USER_MODEL = 'timescaledbapp.User'
 
 REST_FRAMEWORK = {
-
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         # 'rest_framework_simplejwt.authentication.JWTStatelessUserAuthentication',
-
         # To use the DRF Web browsable API
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ],
-
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
     'DEFAULT_PERMISSION_CLASSES': [
@@ -183,12 +180,15 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.CursorPagination',
     'PAGE_SIZE': 16,
-
-    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend'
+    ],
 }
 
 
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATICFILES_STORAGE = (
+    "whitenoise.storage.CompressedManifestStaticFilesStorage"
+)
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=365 * 10),
@@ -196,21 +196,21 @@ SIMPLE_JWT = {
     # 'ROTATE_REFRESH_TOKENS': False,
     # 'BLACKLIST_AFTER_ROTATION': True,
     # 'UPDATE_LAST_LOGIN': False,
-
     # 'ALGORITHM': 'HS256',
     # 'SIGNING_KEY': SECRET_KEY,
     # 'VERIFYING_KEY': None,
     # 'AUDIENCE': None,
     # 'ISSUER': None,
-
     # 'AUTH_HEADER_TYPES': ('Bearer',),
     # 'USER_ID_FIELD': 'id',
     # 'USER_ID_CLAIM': 'user_id',
-
     # 'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     # 'TOKEN_TYPE_CLAIM': 'token_type',
-
     # 'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
     # 'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
     # 'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
+
+
+TIMESCALEDB_CHUNK_INTERVAL = "1 hours"
+TIMESCALEDB_RETENTION_INTERVAL = "60 seconds"

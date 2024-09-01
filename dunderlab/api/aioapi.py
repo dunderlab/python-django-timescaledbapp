@@ -104,7 +104,12 @@ class aioAPI:
     """
 
     # ----------------------------------------------------------------------
-    def __init__(self, url: Optional[str] = None, token: Optional[str] = None, auth: Optional[Any] = None):
+    def __init__(
+        self,
+        url: Optional[str] = None,
+        token: Optional[str] = None,
+        auth: Optional[Any] = None,
+    ):
         if url and not url.endswith("/"):
             url = "{}/".format(url)
         if url:
@@ -115,23 +120,31 @@ class aioAPI:
         self.API_TOKEN_VERIFY = self.API_TOKEN + 'verify/'
 
         if token:
-            self.headers: dict[str, str] = {'Authorization': "Bearer {}".format(token)}
+            self.headers: dict[str, str] = {
+                'Authorization': "Bearer {}".format(token)
+            }
         else:
             self.headers: dict[str, str] = {}
         self.headers['Content-Type'] = 'application/json'
-        self.__endpoints__ = self.endpoints()
-        assert self.__endpoints__, "No endpoints detected. Please ensure the API is operational."
+        self.__endpoints__ = asyncio.wait_for(self.endpoints(), timeout=5)
+        assert (
+            self.__endpoints__
+        ), "No endpoints detected. Please ensure the API is operational."
 
     # ----------------------------------------------------------------------
     async def token(self, username, password):
         """"""
-        response = await self.token_.post({'username': username, 'password': password}, url=self.API_TOKEN)
+        response = await self.token_.post(
+            {'username': username, 'password': password}, url=self.API_TOKEN
+        )
         return response['access']
 
     # ----------------------------------------------------------------------
     async def token_verify(self, token):
         """"""
-        response = await self.token_.post({'token': token}, url=self.API_TOKEN_VERIFY)
+        response = await self.token_.post(
+            {'token': token}, url=self.API_TOKEN_VERIFY
+        )
         if not response:
             return {'detail': 'Token is valid'}
         return response
@@ -147,12 +160,20 @@ class aioAPI:
             A dictionary containing the endpoints if the response status is 200, None otherwise.
         """
         async with aiohttp.ClientSession(headers=self.headers) as session:
-            async with session.get(self.HTTP_SERVICE, auth=self.AUTH) as response:
+            async with session.get(
+                self.HTTP_SERVICE, auth=self.AUTH
+            ) as response:
                 if response.status == 200:
                     return await response.json()
 
     # ----------------------------------------------------------------------
-    async def request(self, call: str, mode: str, data: Union[dict[str, Any], str], url: Optional[str] = None) -> Optional[dict[str, Any]]:
+    async def request(
+        self,
+        call: str,
+        mode: str,
+        data: Union[dict[str, Any], str],
+        url: Optional[str] = None,
+    ) -> Optional[dict[str, Any]]:
         """
         Make an API request.
 
@@ -185,7 +206,9 @@ class aioAPI:
             params, data = data, params
 
             for k in params:
-                if k.endswith('__in') and isinstance(params[k], (list, tuple)):
+                if k.endswith('__in') and isinstance(
+                    params[k], (list, tuple)
+                ):
                     params[k] = ','.join(params[k])
 
             # print(params)
@@ -204,8 +227,12 @@ class aioAPI:
             data = json.dumps(data)
 
         resp = None
-        async with aiohttp.ClientSession(headers=self.headers, timeout=timeout) as session:
-            async with getattr(session, mode)(url, params=params, data=data, auth=self.AUTH) as response:
+        async with aiohttp.ClientSession(
+            headers=self.headers, timeout=timeout
+        ) as session:
+            async with getattr(session, mode)(
+                url, params=params, data=data, auth=self.AUTH
+            ) as response:
                 if response.status in [200, 201]:
                     resp = await response.json()
                     if 'next' in resp and resp['next'] and 'get' == mode:
@@ -223,7 +250,9 @@ class aioAPI:
         return resp
 
     # ----------------------------------------------------------------------
-    async def request_generator(self, resp: dict[str, Any], mode: str) -> AsyncGenerator[dict[str, Any], None]:
+    async def request_generator(
+        self, resp: dict[str, Any], mode: str
+    ) -> AsyncGenerator[dict[str, Any], None]:
         """
         Asynchronous generator to recursively request next page data based on the response from the server.
 
@@ -248,7 +277,9 @@ class aioAPI:
         yield resp
 
     # ----------------------------------------------------------------------
-    async def request_yield(self, mode: str, url: str) -> Optional[dict[str, Any]]:
+    async def request_yield(
+        self, mode: str, url: str
+    ) -> Optional[dict[str, Any]]:
         """
         Asynchronous function to send request to server and fetch JSON data.
 
@@ -266,20 +297,26 @@ class aioAPI:
 
         """
         async with aiohttp.ClientSession(headers=self.headers) as session:
-            async with getattr(session, mode)(url, auth=self.AUTH) as response:
+            async with getattr(session, mode)(
+                url, auth=self.AUTH
+            ) as response:
                 if response.status in [200, 201]:
                     return await response.json()
 
     # ----------------------------------------------------------------------
     async def next(self, data):
         """"""
-        if inspect.isasyncgen(data) or (isinstance(data, dict) and data.get('next', False)):
+        if inspect.isasyncgen(data) or (
+            isinstance(data, dict) and data.get('next', False)
+        ):
             return await anext(data)
         else:
             return data
 
     # ----------------------------------------------------------------------
-    async def fetch_page(self, session: aiohttp.ClientSession, url: str) -> dict[str, Any]:
+    async def fetch_page(
+        self, session: aiohttp.ClientSession, url: str
+    ) -> dict[str, Any]:
         """
         Asynchronous function to fetch a page's JSON data using aiohttp client session.
 
@@ -301,7 +338,9 @@ class aioAPI:
             return await response.json()
 
     # ----------------------------------------------------------------------
-    async def fetch_all_pages(self, pages: list[str]) -> list[dict[str, Any]]:
+    async def fetch_all_pages(
+        self, pages: list[str]
+    ) -> list[dict[str, Any]]:
         """
         Asynchronous function to fetch all page's JSON data concurrently.
 
@@ -363,7 +402,9 @@ class aioAPI:
                 self.endpoint = endpoint.strip('_')
 
             # ----------------------------------------------------------------------
-            def adjust_page_size(self, data: dict[str, Any], batch_size: Optional[int] = None) -> list[dict[str, Any]]:
+            def adjust_page_size(
+                self, data: dict[str, Any], batch_size: Optional[int] = None
+            ) -> list[dict[str, Any]]:
                 """
                 Adjusts the page size based on the specified batch size.
 
@@ -381,10 +422,14 @@ class aioAPI:
                 """
                 original_page_size = data['page_size']
                 request_count = math.ceil(original_page_size / batch_size)
-                initial_index = (data.get('page', 1) - 1) * original_page_size
+                initial_index = (
+                    data.get('page', 1) - 1
+                ) * original_page_size
                 new_initial_page = math.ceil(initial_index / batch_size) + 1
                 all_requests = []
-                for i in range(new_initial_page, new_initial_page + request_count):
+                for i in range(
+                    new_initial_page, new_initial_page + request_count
+                ):
                     new_request = data.copy()
                     new_request['page_size'] = batch_size
                     new_request['page'] = i
@@ -392,7 +437,13 @@ class aioAPI:
                 return all_requests
 
             # ----------------------------------------------------------------------
-            async def submit_data_in_batches(self, data_list: list[dict[str, Any]], method: str, batch_size: int, url: Optional[str] = None) -> list[dict[str, Any]]:
+            async def submit_data_in_batches(
+                self,
+                data_list: list[dict[str, Any]],
+                method: str,
+                batch_size: int,
+                url: Optional[str] = None,
+            ) -> list[dict[str, Any]]:
                 """
                 Submits the data in batches asynchronously.
 
@@ -414,12 +465,19 @@ class aioAPI:
                 """
                 tasks = []
                 for batch_data in batches(data_list, batch_size):
-                    task = asyncio.create_task(cls.request(self.endpoint, method, batch_data, url))
+                    task = asyncio.create_task(
+                        cls.request(self.endpoint, method, batch_data, url)
+                    )
                     tasks.append(task)
                 return await asyncio.gather(*tasks)
 
             # ----------------------------------------------------------------------
-            async def retrieve_data_in_batches(self, data_list: list[dict[str, Any]], method: str, url: Optional[str] = None) -> list[dict[str, Any]]:
+            async def retrieve_data_in_batches(
+                self,
+                data_list: list[dict[str, Any]],
+                method: str,
+                url: Optional[str] = None,
+            ) -> list[dict[str, Any]]:
                 """
                 Retrieves data in batches asynchronously.
 
@@ -439,7 +497,9 @@ class aioAPI:
                 """
                 tasks = []
                 for batch_data in data_list:
-                    task = asyncio.create_task(cls.request(self.endpoint, method, batch_data, url))
+                    task = asyncio.create_task(
+                        cls.request(self.endpoint, method, batch_data, url)
+                    )
                     tasks.append(task)
                 return await asyncio.gather(*tasks)
 
@@ -458,15 +518,31 @@ class aioAPI:
                 function
                     An asynchronous function to be used for making the request.
                 """
-                async def f(data: dict[str, Any] = {}, files: dict[str, Any] = {}, batch_size: Optional[int] = None, url: Optional[str] = None) -> Union[dict[str, Any], list[dict[str, Any]]]:
+
+                async def f(
+                    data: dict[str, Any] = {},
+                    files: dict[str, Any] = {},
+                    batch_size: Optional[int] = None,
+                    url: Optional[str] = None,
+                ) -> Union[dict[str, Any], list[dict[str, Any]]]:
                     if batch_size is None:
-                        return await cls.request(self.endpoint, method, data, url)
+                        return await cls.request(
+                            self.endpoint, method, data, url
+                        )
                     if method == 'post':
-                        return await self.submit_data_in_batches(data_list=data, method=method, batch_size=batch_size, url=url)
+                        return await self.submit_data_in_batches(
+                            data_list=data,
+                            method=method,
+                            batch_size=batch_size,
+                            url=url,
+                        )
                     if method == 'get':
                         data = self.adjust_page_size(data, batch_size)
-                        responses = await self.retrieve_data_in_batches(data_list=data, method=method, url=url)
+                        responses = await self.retrieve_data_in_batches(
+                            data_list=data, method=method, url=url
+                        )
                         return [await anext(d) for d in responses]
+
                 return f
 
         return inset(endpoint)

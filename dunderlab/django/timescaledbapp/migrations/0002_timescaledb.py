@@ -1,6 +1,7 @@
 # Generated manually
 
 from django.db import migrations
+from django.conf import settings
 
 
 class Migration(migrations.Migration):
@@ -9,10 +10,14 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-
         migrations.RunSQL(
-            sql=[(
-                "CREATE TABLE public.timescaledbapp_timeserie ( \
+            sql="CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;",
+            reverse_sql="DROP EXTENSION IF EXISTS timescaledb CASCADE;",
+        ),
+        migrations.RunSQL(
+            sql=[
+                (
+                    f"CREATE TABLE public.timescaledbapp_timeserie ( \
                     timestamp timestamp NOT NULL, \
                     value float NOT NULL, \
                     channel_id int4 NOT NULL, \
@@ -20,13 +25,10 @@ class Migration(migrations.Migration):
                     CONSTRAINT timescaledbapp_timeserie_pkey PRIMARY KEY (timestamp, channel_id, chunk_id), \
                     CONSTRAINT timescaledbapp_timeserie_timestamp_channel_chunk_unique UNIQUE (timestamp, channel_id, chunk_id) \
                 );\
-                SELECT create_hypertable('timescaledbapp_timeserie', 'timestamp', chunk_time_interval => interval '1 hours');"
-            )],
-
-            reverse_sql=[(
-                "DROP TABLE public.timescaledbapp_timeserie;"
-            )]
+                SELECT create_hypertable('timescaledbapp_timeserie', 'timestamp', chunk_time_interval => interval '{settings.TIMESCALEDB_CHUNK_INTERVAL}');\
+                SELECT add_retention_policy('timescaledbapp_timeserie', INTERVAL '{settings.TIMESCALEDB_RETENTION_INTERVAL}');"
+                )
+            ],
+            reverse_sql=[("DROP TABLE public.timescaledbapp_timeserie;")],
         ),
-
-
     ]

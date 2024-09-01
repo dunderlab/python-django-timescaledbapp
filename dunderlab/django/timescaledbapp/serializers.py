@@ -78,7 +78,9 @@ from django.db.utils import IntegrityError
 
 
 # ----------------------------------------------------------------------
-def insert_batch(model: Type[Model], objects: list[Model], batch_size: int = 1000) -> None:
+def insert_batch(
+    model: Type[Model], objects: list[Model], batch_size: int = 1000
+) -> None:
     """
     Inserts a batch of objects into the database.
 
@@ -102,9 +104,19 @@ class SourceSerializer(serializers.ModelSerializer):
     The class converts complex data types into Python datatypes,
     so they can then be easily rendered into JSON, XML, or other content types.
     """
+
     class Meta:
         model = Source
-        fields = ['label', 'name', 'location', 'device', 'protocol', 'version', 'description', 'created']
+        fields = [
+            'label',
+            'name',
+            'location',
+            'device',
+            'protocol',
+            'version',
+            'description',
+            'created',
+        ]
 
 
 ########################################################################
@@ -115,6 +127,7 @@ class MeasureSerializer(serializers.ModelSerializer):
     The class converts complex data types into Python datatypes,
     so they can then be easily rendered into JSON, XML, or other content types.
     """
+
     source = serializers.CharField(source='source_id')
 
     class Meta:
@@ -131,12 +144,21 @@ class ChannelSerializer(serializers.ModelSerializer):
     so they can then be easily rendered into JSON, XML, or other content types.
     Also, it provides a method to create new Channel instances.
     """
+
     measure = serializers.CharField()
     source = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = Channel
-        fields = ['label', 'name', 'unit', 'sampling_rate', 'description', 'source', 'measure']
+        fields = [
+            'label',
+            'name',
+            'unit',
+            'sampling_rate',
+            'description',
+            'source',
+            'measure',
+        ]
 
     # ----------------------------------------------------------------------
     def create(self, validated_data: dict[str, Any]) -> Channel:
@@ -177,6 +199,7 @@ class ChunkSerializer(serializers.ModelSerializer):
     so they can then be easily rendered into JSON, XML, or other content types.
     Also, it provides a method to create new Chunk instances.
     """
+
     measure = serializers.CharField(source='measure.label')
 
     class Meta:
@@ -249,7 +272,9 @@ class DictOrListField(serializers.Field):
         return value
 
     # ----------------------------------------------------------------------
-    def to_internal_value(self, data: Union[list[Any], dict[Any, Any]]) -> Union[list[Any], dict[Any, Any]]:
+    def to_internal_value(
+        self, data: Union[list[Any], dict[Any, Any]]
+    ) -> Union[list[Any], dict[Any, Any]]:
         """
         Validates the incoming data and returns the converted form.
 
@@ -266,9 +291,14 @@ class DictOrListField(serializers.Field):
         if isinstance(data, list):
             return [self.child.to_internal_value(item) for item in data]
         elif isinstance(data, dict):
-            return {key: self.child.to_internal_value(value) for key, value in data.items()}
+            return {
+                key: self.child.to_internal_value(value)
+                for key, value in data.items()
+            }
         else:
-            raise serializers.ValidationError("Invalid data type. Expected a dictionary or a list.")
+            raise serializers.ValidationError(
+                "Invalid data type. Expected a dictionary or a list."
+            )
 
 
 ########################################################################
@@ -352,7 +382,9 @@ class TimeserieSerializer(serializers.Serializer):
     source = serializers.CharField(required=False, allow_blank=True)
     measure = serializers.CharField()
     timestamps = DictOrListField(child=TimestampField())
-    values = serializers.DictField(child=DictOrListField(child=serializers.FloatField()))
+    values = serializers.DictField(
+        child=DictOrListField(child=serializers.FloatField())
+    )
     chunk = serializers.CharField(required=False, allow_blank=True)
 
     # ----------------------------------------------------------------------
@@ -370,33 +402,53 @@ class TimeserieSerializer(serializers.Serializer):
         dict[str, Any]
             A status message indicating the success of the operation and the number of objects created.
         """
-        measure = Measure.objects.select_related('source').get(source_id=validated_data.pop('source'), label=validated_data.pop('measure'))
+        measure = Measure.objects.select_related('source').get(
+            source_id=validated_data.pop('source'),
+            label=validated_data.pop('measure'),
+        )
         timestamps = np.array(validated_data.pop('timestamps'))
         values = validated_data.pop('values')
 
         # chunk, _ = Chunk.objects.get_or_create(measure=measure, label=validated_data.pop('chunk', 'default'))
 
         if chunk_label := validated_data.pop('chunk', False):
-            chunk = Chunk.objects.create(measure=measure, label=validated_data.pop('chunk', chunk_label))
+            chunk = Chunk.objects.create(
+                measure=measure,
+                label=validated_data.pop('chunk', chunk_label),
+            )
         else:
-            chunk, _ = Chunk.objects.get_or_create(measure=measure, label=validated_data.pop('chunk', 'default'))
+            chunk, _ = Chunk.objects.get_or_create(
+                measure=measure, label=validated_data.pop('chunk', 'default')
+            )
 
         if isinstance(timestamps[0], (float, int, np.integer, np.floating)):
-            timestamps = np.array(list(map(lambda t:
-                                           make_aware(datetime.fromtimestamp(t)), timestamps)))
+            timestamps = np.array(
+                list(
+                    map(
+                        lambda t: make_aware(datetime.fromtimestamp(t)),
+                        timestamps,
+                    )
+                )
+            )
 
         channels = Channel.objects.filter(measure=measure)
-        channel_dict = {channel.label: channel for channel in channels if channel.label in values.keys()}
+        channel_dict = {
+            channel.label: channel
+            for channel in channels
+            if channel.label in values.keys()
+        }
 
         # for channel_label in channel_dict:
-            # channel = channel_dict[channel_label]
-            # channel.count = channel.count + len(timestamps)
-            # channel.save()
+        # channel = channel_dict[channel_label]
+        # channel.count = channel.count + len(timestamps)
+        # channel.save()
 
         timeseries = []
         for channel_label in values:
             channel = channel_dict[channel_label]
-            values[channel_label] = (np.array(values[channel_label]) * channel.scale_factor).tolist()
+            values[channel_label] = (
+                np.array(values[channel_label]) * channel.scale_factor
+            ).tolist()
             for i, value in enumerate(values[channel_label]):
                 timeserie_params = {
                     'timestamp': timestamps[i],
@@ -410,20 +462,47 @@ class TimeserieSerializer(serializers.Serializer):
 
             insert_batch(TimeSerie, timeseries, batch_size=1000)
         except IntegrityError:
-            return Response({
-                "status": "fail",
-                "message": "Objects can not be created.",
-            },
-                status=status.HTTP_403_FORBIDDEN, content_type='application/json')
+            return Response(
+                {
+                    "status": "fail",
+                    "message": "Objects can not be created.",
+                },
+                status=status.HTTP_403_FORBIDDEN,
+                content_type='application/json',
+            )
 
         for channel_label in channel_dict:
             channel = channel_dict[channel_label]
             channel.count = channel.count + len(timestamps)
             channel.save()
 
-        return Response({
-            "status": "success",
-            "message": "Your data has been successfully saved.",
-            "objects_created": len(timeseries),
-        },
-            status=status.HTTP_201_CREATED, content_type='application/json')
+        return Response(
+            {
+                "status": "success",
+                "message": "Your data has been successfully saved.",
+                "objects_created": len(timeseries),
+            },
+            status=status.HTTP_201_CREATED,
+            content_type='application/json',
+        )
+
+
+########################################################################
+class TimeserieBrowsableSerializer(serializers.ModelSerializer):
+    source = serializers.CharField(
+        source='channel.measure.source.label', read_only=True
+    )
+    measure = serializers.CharField(
+        source='channel.measure.label', read_only=True
+    )
+
+    class Meta:
+        model = TimeSerie
+        fields = [
+            'source',
+            'measure',
+            'channel',
+            'chunk',
+            'timestamp',
+            'value',
+        ]
