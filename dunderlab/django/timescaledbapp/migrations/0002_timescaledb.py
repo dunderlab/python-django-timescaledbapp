@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
                     CONSTRAINT timescaledbapp_timeserie_timestamp_channel_chunk_unique UNIQUE (timestamp, channel_id, chunk_id) \
                 );\
                 SELECT create_hypertable('timescaledbapp_timeserie', 'timestamp', chunk_time_interval => interval '{settings.TIMESCALEDB_CHUNK_INTERVAL}');\
-                SELECT add_retention_policy('timescaledbapp_timeserie', INTERVAL '{settings.TIMESCALEDB_RETENTION_INTERVAL}');"
+                SELECT add_retention_policy('timescaledbapp_timeserie', INTERVAL '{settings.TIMESCALEDB_RETENTION_INTERVAL}', schedule_interval => INTERVAL '{settings.TIMESCALEDB_SCHEDULE_INTERVAL}');"
                 )
             ],
             reverse_sql=[("DROP TABLE public.timescaledbapp_timeserie;")],

@@ -143,6 +143,13 @@ class TimescaleConfigView(View):
             ),
         )
 
+        schedule_interval = request.POST.get(
+            'schedule_interval',
+            json.loads(request.body.decode('utf8')).get(
+                'schedule_interval', settings.TIMESCALEDB_SCHEDULE_INTERVAL
+            ),
+        )
+
         try:
             # Usa la conexión a la base de datos 'timescaledb'
             with connections['timescaledb'].cursor() as cursor:
@@ -170,7 +177,7 @@ class TimescaleConfigView(View):
 
                 # Añadir la nueva política de retención
                 cursor.execute(
-                    f"SELECT add_retention_policy('timescaledbapp_timeserie', INTERVAL '{retention_interval}');"
+                    f"SELECT add_retention_policy('timescaledbapp_timeserie', INTERVAL '{retention_interval}', schedule_interval => INTERVAL '{schedule_interval}');"
                 )
 
             return JsonResponse(
@@ -178,6 +185,7 @@ class TimescaleConfigView(View):
                     'status': 'success',
                     'chunk_interval': chunk_interval,
                     'retention_interval': retention_interval,
+                    'schedule_interval': schedule_interval,
                 }
             )
         except Exception as e:

@@ -6,7 +6,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md')) as readme:
 
 setup(
     name='dunderlab-timescaledbapp',
-    version='0.1.15',
+    version='0.1.17',
     packages=['dunderlab.django.timescaledbapp', 'dunderlab.api'],
     author='Yeison Cardona',
     author_email='yencardonaal@unal.edu.co',
